@@ -7,6 +7,8 @@ Läuft unter Windows, macOS und Linux. Benötigt nur die Python-Standardbiblioth
 (tkinter ist im offiziellen Windows-Installer von python.org enthalten).
 
 Start:  python sibank2educa.py
+
+Erstellt mit Unterstützung von Claude (KI-Assistent von Anthropic).
 """
 
 import csv

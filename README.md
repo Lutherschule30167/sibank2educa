@@ -152,6 +152,10 @@ Dieses Projekt steht in keiner Verbindung zu den Herstellern von Sibank oder EDU
 
 Die Website liegt im Ordner [`docs/`](docs/) und wird über GitHub Pages veröffentlicht (Einstellungen → Pages → Branch `main`, Ordner `/docs`). Sie lädt keine externen Ressourcen und setzt keine Cookies.
 
+## Entstehung
+
+Programmcode, Dokumentation und Website wurden mit Unterstützung von [Claude](https://www.anthropic.com/claude), einem KI-Assistenten von Anthropic, erstellt. Anforderungen, Prüfung und Tests liegen beim Projektverantwortlichen.
+
 ## Lizenz
 
 [MIT](LICENSE)
