@@ -146,6 +146,10 @@ Die EXE liegt anschließend in `dist/`. Alternativ baut der GitHub-Workflow unte
 
 Dieses Projekt steht in keiner Verbindung zu den Herstellern von Sibank oder EDUCA. Alle genannten Produktnamen gehören ihren jeweiligen Inhabern. Die Nutzung erfolgt auf eigene Verantwortung – bitte die erzeugten Dateien vor dem Import stichprobenartig prüfen.
 
+## Projektwebsite
+
+Die Website liegt im Ordner [`docs/`](docs/) und wird über GitHub Pages veröffentlicht (Einstellungen → Pages → Branch `main`, Ordner `/docs`). Sie lädt keine externen Ressourcen und setzt keine Cookies.
+
 ## Lizenz
 
 [MIT](LICENSE)

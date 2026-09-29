@@ -1,0 +1,542 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>sibank2educa – Sibank-Exporte für den EDUCA-Import umwandeln</title>
+<meta name="description" content="Kostenloses Windows-Tool, das die Schüler- und Lehrerexporte aus Sibank in die Importdatei für EDUCA umwandelt. Läuft lokal, ohne Installation.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='5' fill='%231F46A8'/%3E%3Cpath d='M7 11h18M7 16h18M7 21h12' stroke='%23fff' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>
+  :root {
+    --papier: #FCFDFF;
+    --papier-voll: #FFFFFF;
+    --karo: #E4ECF6;
+    --linie: #C8D5E5;
+    --tinte: #1F46A8;
+    --tinte-tief: #16337D;
+    --rand: #D6383D;
+    --graphit: #1F2328;
+    --grau: #5B6472;
+    --marker: #FFEB7A;
+    --marker-kante: #E6C63A;
+
+    --schrift: system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --mono: ui-monospace, "Cascadia Mono", Consolas, "SF Mono", Menlo, monospace;
+
+    --rand-abstand: 48px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --papier: #14181F;
+      --papier-voll: #1A1F28;
+      --karo: #1E2530;
+      --linie: #313B4A;
+      --tinte: #8EA9FF;
+      --tinte-tief: #B3C5FF;
+      --rand: #F06A6E;
+      --graphit: #E7EAF0;
+      --grau: #A2ABB8;
+      --marker: #5B4F12;
+      --marker-kante: #9C8420;
+    }
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { transition: none !important; } }
+
+  body {
+    margin: 0;
+    font-family: var(--schrift);
+    font-size: 1.0625rem;
+    line-height: 1.6;
+    color: var(--graphit);
+    background-color: var(--papier);
+    background-image:
+      linear-gradient(var(--karo) 1px, transparent 1px),
+      linear-gradient(90deg, var(--karo) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  a { color: var(--tinte); text-underline-offset: 3px; }
+  a:hover { color: var(--tinte-tief); }
+  :focus-visible { outline: 3px solid var(--tinte); outline-offset: 2px; border-radius: 3px; }
+
+  .springen {
+    position: absolute; left: 1rem; top: -4rem;
+    background: var(--tinte); color: #fff; padding: .5rem 1rem; z-index: 10;
+  }
+  .springen:focus { top: 1rem; }
+
+  .wrap {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding-left: calc(var(--rand-abstand) + 24px);
+    padding-right: 24px;
+  }
+
+  /* Kopfzeile */
+  .kopf { border-bottom: 1px solid var(--linie); background: var(--papier-voll); }
+  .kopf .wrap { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem 2rem; padding-top: .9rem; padding-bottom: .9rem; }
+  .marke { font-weight: 700; font-size: 1.15rem; color: var(--graphit); text-decoration: none; letter-spacing: -.01em; }
+  .marke span { color: var(--tinte); }
+  .kopf nav { display: flex; flex-wrap: wrap; gap: .25rem 1.25rem; font-size: .95rem; }
+  .kopf nav a { color: var(--grau); text-decoration: none; }
+  .kopf nav a:hover { color: var(--tinte); text-decoration: underline; }
+
+  /* Heftrand */
+  main.wrap { position: relative; padding-bottom: 4rem; }
+  main.wrap::before {
+    content: "";
+    position: absolute;
+    top: 0; bottom: 0;
+    left: var(--rand-abstand);
+    width: 2px;
+    background: var(--rand);
+    opacity: .75;
+  }
+
+  section { padding-top: 4.5rem; }
+  h1, h2, h3 { line-height: 1.15; letter-spacing: -.015em; margin: 0; }
+  h1 { font-size: clamp(2.1rem, 5.2vw, 3.5rem); font-weight: 750; max-width: 18ch; }
+  h2 { font-size: clamp(1.6rem, 3.2vw, 2.1rem); font-weight: 700; margin-bottom: 1rem; }
+  h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: .6rem; }
+  p { margin: 0 0 1rem; max-width: 68ch; }
+  .grau { color: var(--grau); }
+
+  /* Einstieg */
+  .einstieg { padding-top: 3.5rem; }
+  .einstieg .lead { font-size: 1.2rem; margin-top: 1.25rem; max-width: 56ch; }
+  .aktionen { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 1.5rem; margin: 1.75rem 0 .75rem; }
+  .knopf {
+    display: inline-block;
+    background: var(--tinte); color: #fff;
+    padding: .8rem 1.4rem; border-radius: 6px;
+    font-weight: 650; text-decoration: none;
+  }
+  .knopf:hover { background: var(--tinte-tief); color: #fff; }
+  @media (prefers-color-scheme: dark) { .knopf, .knopf:hover { color: #0E1320; } }
+  .klein { font-size: .92rem; color: var(--grau); }
+
+  /* Zuordnungs-Demo */
+  .demo {
+    margin: 3rem 0 0;
+    padding: 1.5rem;
+    background: var(--papier-voll);
+    border: 1px solid var(--linie);
+    border-radius: 4px;
+  }
+  .demo-titel { font-weight: 700; margin-bottom: .25rem; }
+  .demo-hilfe { font-size: .95rem; color: var(--grau); margin-bottom: 1.25rem; }
+  .zeilen-name { font-size: .9rem; font-weight: 650; color: var(--grau); margin: 0 0 .4rem; }
+  .zeile { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 1rem; padding: 0; list-style: none; }
+  .zelle, .chip {
+    font: inherit;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+    background: var(--papier);
+    border: 1px solid var(--linie);
+    border-radius: 3px;
+    padding: .4rem .65rem;
+    transition: background-color .15s, border-color .15s;
+  }
+  .zelle:hover, .chip:hover { border-color: var(--tinte); }
+  .zelle .feld { display: block; font-size: .78rem; color: var(--grau); line-height: 1.3; }
+  .zelle .wert { display: block; font-family: var(--mono); font-size: .9rem; line-height: 1.4; white-space: nowrap; }
+  .zelle.an, .chip.an { background: var(--marker); border-color: var(--marker-kante); }
+  .zelle.an .feld { color: var(--graphit); }
+
+  .einstellungen { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin: .25rem 0 1.25rem; font-size: .92rem; color: var(--grau); }
+  .chip { font-size: .88rem; border-style: dashed; }
+  .pfeil { color: var(--grau); font-size: 1.1rem; }
+
+  .erklaerung {
+    margin: .25rem 0 0;
+    padding-top: 1rem;
+    border-top: 1px solid var(--linie);
+    min-height: 3.6em;
+    color: var(--tinte-tief);
+    font-size: 1.05rem;
+    max-width: none;
+  }
+  .erklaerung strong { font-family: var(--mono); font-weight: 600; }
+
+  /* Funktionen */
+  .funktionen { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.75rem 2.5rem; margin: 1.5rem 0 0; }
+  .funktionen div { border-top: 2px solid var(--tinte); padding-top: .75rem; }
+  .funktionen dt { font-weight: 700; margin-bottom: .3rem; }
+  .funktionen dd { margin: 0; color: var(--grau); }
+
+  /* Ablauf */
+  .ablauf { list-style: none; counter-reset: schritt; margin: 1.5rem 0 0; padding: 0; }
+  .ablauf li { counter-increment: schritt; position: relative; padding: 0 0 1.5rem 3.25rem; max-width: 70ch; }
+  .ablauf li::before {
+    content: counter(schritt);
+    position: absolute; left: 0; top: -.1rem;
+    width: 2.2rem; height: 2.2rem;
+    display: grid; place-items: center;
+    border: 2px solid var(--tinte); border-radius: 50%;
+    color: var(--tinte); font-weight: 700;
+    background: var(--papier-voll);
+  }
+  .ablauf strong { display: block; }
+
+  /* Tabellen */
+  .tabellen { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem 2.5rem; margin-top: 1.5rem; }
+  .scroll { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; background: var(--papier-voll); font-size: .97rem; }
+  caption { text-align: left; font-weight: 700; padding-bottom: .5rem; font-size: 1.05rem; }
+  th, td { text-align: left; padding: .45rem .75rem; border-bottom: 1px solid var(--linie); vertical-align: top; }
+  thead th { border-bottom: 2px solid var(--graphit); font-size: .9rem; }
+  td.nr { width: 4.5rem; color: var(--grau); font-variant-numeric: tabular-nums; }
+  code, .code { font-family: var(--mono); font-size: .92em; }
+  td code { white-space: nowrap; }
+
+  /* Dateiname */
+  .dateiname { display: flex; flex-wrap: wrap; align-items: flex-start; gap: .2rem; margin: 1.5rem 0 2rem; }
+  .dateiname .teil { display: flex; flex-direction: column; }
+  .dateiname .teil b {
+    font-family: var(--mono); font-weight: 500;
+    font-size: clamp(1.05rem, 2.6vw, 1.5rem);
+    padding: .3rem .5rem;
+    background: var(--papier-voll);
+    border: 1px solid var(--linie);
+    border-radius: 3px;
+  }
+  .dateiname .teil small { font-size: .8rem; color: var(--grau); padding: .3rem .1rem 0; max-width: 11ch; line-height: 1.3; }
+  .dateiname .trenner { font-family: var(--mono); font-size: clamp(1.05rem, 2.6vw, 1.5rem); padding-top: .35rem; color: var(--grau); }
+
+  pre {
+    margin: 0 0 1rem;
+    padding: 1rem 1.1rem;
+    background: var(--papier-voll);
+    border: 1px solid var(--linie);
+    border-radius: 4px;
+    overflow-x: auto;
+    font-family: var(--mono);
+    font-size: .85rem;
+    line-height: 1.55;
+  }
+
+  /* Hinweiskasten */
+  .hinweis {
+    border-left: 4px solid var(--rand);
+    background: var(--papier-voll);
+    padding: .9rem 1.1rem;
+    margin: 1.5rem 0;
+    max-width: 72ch;
+  }
+  .hinweis p:last-child { margin-bottom: 0; }
+
+  /* Fragen */
+  details { border-bottom: 1px solid var(--linie); max-width: 76ch; background: transparent; }
+  details:first-of-type { border-top: 1px solid var(--linie); }
+  summary { cursor: pointer; padding: .9rem 0; font-weight: 650; list-style: none; display: flex; justify-content: space-between; gap: 1rem; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: "+"; color: var(--tinte); font-size: 1.3rem; line-height: 1; }
+  details[open] summary::after { content: "–"; }
+  details > div { padding: 0 0 1rem; }
+
+  /* Fußzeile */
+  .fuss { border-top: 1px solid var(--linie); background: var(--papier-voll); }
+  .fuss .wrap { padding-top: 1.75rem; padding-bottom: 2rem; font-size: .92rem; color: var(--grau); }
+  .fuss p { margin-bottom: .5rem; }
+
+  @media (max-width: 640px) {
+    :root { --rand-abstand: 16px; }
+    .wrap { padding-left: calc(var(--rand-abstand) + 18px); padding-right: 16px; }
+    .demo { padding: 1rem; }
+    section { padding-top: 3.5rem; }
+  }
+</style>
+</head>
+<body>
+<a class="springen" href="#inhalt">Zum Inhalt springen</a>
+
+<header class="kopf">
+  <div class="wrap">
+    <a class="marke" href="#inhalt">sibank<span>2</span>educa</a>
+    <nav aria-label="Seitennavigation">
+      <a href="#funktionen">Funktionen</a>
+      <a href="#einrichtung">Einrichtung</a>
+      <a href="#zieldatei">Zieldatei</a>
+      <a href="#fragen">Fragen</a>
+      <a data-link="repo" href="https://github.com/">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main id="inhalt" class="wrap">
+
+  <section class="einstieg" aria-labelledby="titel">
+    <h1 id="titel">Sibank-Listen für den EDUCA&#8209;Import umwandeln</h1>
+    <p class="lead">sibank2educa liest die Schüler- und Lehrerexporte aus Sibank und erzeugt daraus die CSV-Datei, die EDUCA für den Import erwartet. Ohne Installation, direkt auf dem Schulrechner.</p>
+    <div class="aktionen">
+      <a class="knopf" data-link="download" href="https://github.com/">sibank2educa.exe herunterladen</a>
+      <a data-link="releases" href="https://github.com/">Alle Versionen</a>
+    </div>
+    <p class="klein">Für Windows 10 und 11. Mit Python läuft das Tool auch unter macOS und Linux.</p>
+
+    <figure class="demo" id="demo">
+      <figcaption>
+        <div class="demo-titel">Aus einer Zeile Sibank wird eine Zeile EDUCA</div>
+        <div class="demo-hilfe">Zeigen oder tippen Sie auf ein Feld, um zu sehen, woher es kommt und wie es umgewandelt wird. Die Daten sind erfunden.</div>
+      </figcaption>
+
+      <p class="zeilen-name">Sibank-Schülerexport</p>
+      <div class="zeile" role="group" aria-label="Felder im Sibank-Schülerexport">
+        <button type="button" class="zelle" data-id="ident" aria-controls="erklaerung" data-text="Die Identnummer wird Teil der recordUID: Schulnummer, Identnummer und S für Schüler."><span class="feld">Identnummer</span><span class="wert">2025010100000001</span></button>
+        <button type="button" class="zelle" data-id="vorname" aria-controls="erklaerung"><span class="feld">offizieller Vorname</span><span class="wert">Max</span></button>
+        <button type="button" class="zelle" data-id="name" aria-controls="erklaerung"><span class="feld">Familienname</span><span class="wert">Mustermann</span></button>
+        <button type="button" class="zelle" data-id="klasse" aria-controls="erklaerung"><span class="feld">Klasse</span><span class="wert">5a</span></button>
+        <button type="button" class="zelle" data-id="geburt" aria-controls="erklaerung"><span class="feld">Geburtsdatum</span><span class="wert">14.03.2015</span></button>
+        <button type="button" class="zelle" data-id="ort" aria-controls="erklaerung"><span class="feld">Geburtsort</span><span class="wert">Hannover</span></button>
+        <button type="button" class="zelle" data-id="geschlecht" aria-controls="erklaerung"><span class="feld">Geschlecht</span><span class="wert">M</span></button>
+        <button type="button" class="zelle" data-id="zugang" aria-controls="erklaerung"><span class="feld">Zugang</span><span class="wert">01.08.2025</span></button>
+      </div>
+
+      <div class="einstellungen" role="group" aria-label="Einstellungen im Tool">
+        <span class="pfeil" aria-hidden="true">↓</span>
+        <span>dazu aus den Einstellungen:</span>
+        <button type="button" class="chip" data-id="schulnr" aria-controls="erklaerung" data-text="Die Schulnummer tragen Sie einmal im Tool ein. Sie steckt in recordUID, schools und school_classes.">Schulnummer 611</button>
+        <button type="button" class="chip" data-id="jahr" aria-controls="erklaerung" data-text="Das Schuljahr wird automatisch vorbelegt, 2026/27 ergibt 2627. Es wird Teil von school_classes.">Schuljahr 2627</button>
+        <button type="button" class="chip" data-id="typ" aria-controls="erklaerung" data-text="Aus der Schülerdatei wird S und student, aus der Lehrerdatei L und teacher.">Schülerdatei</button>
+      </div>
+
+      <p class="zeilen-name">EDUCA-Import</p>
+      <div class="zeile" role="group" aria-label="Felder in der EDUCA-Importdatei">
+        <button type="button" class="zelle" data-von="schulnr ident typ" aria-controls="erklaerung" data-text="&lt;strong&gt;recordUID&lt;/strong&gt; setzt sich zusammen aus Schulnummer, Identnummer und S für Schüler. Bei Lehrern steht am Ende L."><span class="feld">recordUID</span><span class="wert">611-2025010100000001-S</span></button>
+        <button type="button" class="zelle" data-von="schulnr" aria-controls="erklaerung" data-text="&lt;strong&gt;schools&lt;/strong&gt; enthält die Schulnummer aus den Einstellungen."><span class="feld">schools</span><span class="wert">611</span></button>
+        <button type="button" class="zelle" data-von="vorname" aria-controls="erklaerung" data-text="&lt;strong&gt;firstname&lt;/strong&gt; wird unverändert übernommen."><span class="feld">firstname</span><span class="wert">Max</span></button>
+        <button type="button" class="zelle" data-von="name" aria-controls="erklaerung" data-text="&lt;strong&gt;lastname&lt;/strong&gt; wird unverändert übernommen."><span class="feld">lastname</span><span class="wert">Mustermann</span></button>
+        <button type="button" class="zelle" data-von="schulnr jahr klasse" aria-controls="erklaerung" data-text="&lt;strong&gt;school_classes&lt;/strong&gt; besteht aus Schulnummer, Schuljahr und Klasse. Die Klasse bekommt eine führende Null: aus 5a wird 05a."><span class="feld">school_classes</span><span class="wert">611-2627-05a</span></button>
+        <button type="button" class="zelle" data-von="typ" aria-controls="erklaerung" data-text="&lt;strong&gt;user_role&lt;/strong&gt; ist student für die Schülerdatei und teacher für die Lehrerdatei."><span class="feld">user_role</span><span class="wert">student</span></button>
+        <button type="button" class="zelle" data-von="geburt" aria-controls="erklaerung" data-text="&lt;strong&gt;birthday&lt;/strong&gt; wird von TT.MM.JJJJ in JJJJ-MM-TT umgewandelt."><span class="feld">birthday</span><span class="wert">2015-03-14</span></button>
+        <button type="button" class="zelle" data-von="ort" aria-controls="erklaerung" data-text="&lt;strong&gt;birthplace&lt;/strong&gt; wird übernommen. Im Tool lässt sich das per Häkchen abschalten."><span class="feld">birthplace</span><span class="wert">Hannover</span></button>
+        <button type="button" class="zelle" data-von="geschlecht" aria-controls="erklaerung" data-text="&lt;strong&gt;geschlecht&lt;/strong&gt; wird kleingeschrieben: M wird m, W wird w."><span class="feld">geschlecht</span><span class="wert">m</span></button>
+        <button type="button" class="zelle" data-von="" aria-controls="erklaerung" data-text="&lt;strong&gt;abgang&lt;/strong&gt; ist immer NULL."><span class="feld">abgang</span><span class="wert">NULL</span></button>
+        <button type="button" class="zelle" data-von="zugang" aria-controls="erklaerung" data-text="&lt;strong&gt;zugang&lt;/strong&gt; wird wie das Geburtsdatum umgewandelt. Fehlt es, steht dort NULL."><span class="feld">zugang</span><span class="wert">2025-08-01</span></button>
+        <button type="button" class="zelle" data-von="" aria-controls="erklaerung" data-text="&lt;strong&gt;kuerzel&lt;/strong&gt; ist bei Schülern NULL. Bei Lehrern steht hier das Kürzel aus Sibank."><span class="feld">kuerzel</span><span class="wert">NULL</span></button>
+        <button type="button" class="zelle" data-von="" aria-controls="erklaerung" data-text="&lt;strong&gt;akademischerTitel&lt;/strong&gt; ist immer NULL."><span class="feld">akademischerTitel</span><span class="wert">NULL</span></button>
+      </div>
+
+      <p class="erklaerung" id="erklaerung" aria-live="polite"><strong>school_classes</strong> besteht aus Schulnummer, Schuljahr und Klasse. Die Klasse bekommt eine führende Null: aus 5a wird 05a.</p>
+    </figure>
+  </section>
+
+  <section id="funktionen" aria-labelledby="h-funktionen">
+    <h2 id="h-funktionen">Was das Tool übernimmt</h2>
+    <dl class="funktionen">
+      <div><dt>Schüler und Lehrer in einem Durchgang</dt><dd>Beide Sibank-Exporte laden und wahlweise in einer gemeinsamen oder in zwei getrennten Dateien speichern.</dd></div>
+      <div><dt>Oberstufe ausblenden</dt><dd>Die Jahrgänge 11 bis 13 werden standardmäßig weggelassen. Ein Häkchen nimmt sie wieder mit auf.</dd></div>
+      <div><dt>Nach Klassen sortiert</dt><dd>Die Schüler stehen in der Reihenfolge 05a, 05b, 06a … und innerhalb der Klasse alphabetisch. Die Lehrer folgen nach Namen sortiert.</dd></div>
+      <div><dt>Vorschau vor dem Speichern</dt><dd>Die fertigen Datensätze erscheinen als Tabelle. Jede Änderung an den Einstellungen ist sofort sichtbar.</dd></div>
+      <div><dt>Warnungen bei Unstimmigkeiten</dt><dd>Ungültige Daten, fehlende Klassen oder doppelte IDs werden mit Zeilennummer und Namen gemeldet.</dd></div>
+      <div><dt>Merkt sich Ihre Schule</dt><dd>Schulnummer und Zielordner sind beim nächsten Start schon eingetragen. Das Schuljahr stellt sich jeweils zum 1. August um.</dd></div>
+    </dl>
+  </section>
+
+  <section id="ablauf" aria-labelledby="h-ablauf">
+    <h2 id="h-ablauf">So kommen die Daten nach EDUCA</h2>
+    <ol class="ablauf">
+      <li><strong>Listen in Sibank anlegen</strong>Einmalig je eine Liste für Schüler und Lehrer im Listengenerator erstellen, wie unten beschrieben.</li>
+      <li><strong>Listen als CSV exportieren</strong>Die beiden Listen aus Sibank als CSV-Dateien speichern.</li>
+      <li><strong>sibank2educa starten</strong>Die Schüler- und die Lehrerdatei öffnen, Schulnummer und Schuljahr prüfen und die Vorschau kontrollieren.</li>
+      <li><strong>Konvertieren und importieren</strong>Auf „Konvertieren“ klicken und die erzeugte Datei in EDUCA importieren.</li>
+    </ol>
+  </section>
+
+  <section id="einrichtung" aria-labelledby="h-einrichtung">
+    <h2 id="h-einrichtung">Listen im Sibank-Listengenerator anlegen</h2>
+    <p>Die beiden Exporte entstehen über den Listengenerator in Sibank. Legen Sie dort einmalig je eine neue Liste an und wählen Sie auf dem Reiter „Felder“ die Felder genau in dieser Reihenfolge aus. Die Spaltenüberschriften entsprechen jeweils dem Feldnamen.</p>
+
+    <div class="tabellen">
+      <div class="scroll">
+        <table>
+          <caption>Liste für den Schülerexport</caption>
+          <thead><tr><th scope="col">Spalte</th><th scope="col">Feld und Überschrift</th></tr></thead>
+          <tbody>
+            <tr><td class="nr">1</td><td>Identnummer</td></tr>
+            <tr><td class="nr">2</td><td>offizieller Vorname</td></tr>
+            <tr><td class="nr">3</td><td>Familienname</td></tr>
+            <tr><td class="nr">4</td><td>Klasse</td></tr>
+            <tr><td class="nr">5</td><td>Geburtsdatum</td></tr>
+            <tr><td class="nr">6</td><td>Geburtsort</td></tr>
+            <tr><td class="nr">7</td><td>Geschlecht</td></tr>
+            <tr><td class="nr">8</td><td>Zugang</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="scroll">
+        <table>
+          <caption>Liste für den Lehrerexport</caption>
+          <thead><tr><th scope="col">Spalte</th><th scope="col">Feld und Überschrift</th></tr></thead>
+          <tbody>
+            <tr><td class="nr">1</td><td>LehrerID</td></tr>
+            <tr><td class="nr">2</td><td>Vorname</td></tr>
+            <tr><td class="nr">3</td><td>Name</td></tr>
+            <tr><td class="nr">4</td><td>Geburtsdatum</td></tr>
+            <tr><td class="nr">5</td><td>Geschlecht</td></tr>
+            <tr><td class="nr">6</td><td>Zugangsdatum</td></tr>
+            <tr><td class="nr">7</td><td>Kürzel</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="scroll">
+        <table>
+          <caption>Für alle Felder gleich</caption>
+          <thead><tr><th scope="col">Einstellung</th><th scope="col">Wert</th></tr></thead>
+          <tbody>
+            <tr><td>Breite</td><td>0</td></tr>
+            <tr><td>Summe</td><td>nicht angehakt</td></tr>
+            <tr><td>Ausrichtung</td><td>Links</td></tr>
+            <tr><td>Vor und Nach</td><td>leer</td></tr>
+            <tr><td>Spalte</td><td>fortlaufend wie links</td></tr>
+            <tr><td>Zeile und Position</td><td>jeweils 1</td></tr>
+            <tr><td>Gleiche Felder einfügen</td><td>nicht angehakt</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <p class="klein" style="margin-top:1rem">Groß- und Kleinschreibung der Überschriften spielt keine Rolle. Trennzeichen (Komma oder Semikolon) und Zeichenkodierung erkennt das Tool selbst.</p>
+  </section>
+
+  <section id="zieldatei" aria-labelledby="h-zieldatei">
+    <h2 id="h-zieldatei">Was in der Zieldatei steht</h2>
+    <p>Der Dateiname entsteht automatisch. Er zeigt auf einen Blick, für welche Schule, welches Schuljahr und welche Personengruppe die Datei erstellt wurde und wann.</p>
+
+    <div class="dateiname" role="img" aria-label="Beispiel-Dateiname 611_2627_SuS_LuL_20260929_1435.csv: Schulnummer, Schuljahr, Inhalt, Datum und Uhrzeit, getrennt durch Unterstriche.">
+      <span class="teil"><b>611</b><small>Schul&shy;nummer</small></span><span class="trenner">_</span>
+      <span class="teil"><b>2627</b><small>Schuljahr</small></span><span class="trenner">_</span>
+      <span class="teil"><b>SuS_LuL</b><small>SuS, LuL oder beides</small></span><span class="trenner">_</span>
+      <span class="teil"><b>20260929</b><small>Datum</small></span><span class="trenner">_</span>
+      <span class="teil"><b>1435</b><small>Uhrzeit</small></span>
+      <span class="teil"><b>.csv</b><small>&nbsp;</small></span>
+    </div>
+
+    <p>Alle Felder stehen in Anführungszeichen und sind durch Kommas getrennt, so wie es der EDUCA-Import vorgibt:</p>
+<pre>"recordUID","schools","firstname","lastname","school_classes","user_role","birthday","birthplace","geschlecht","abgang","zugang","kuerzel","akademischerTitel"
+"611-2025010100000001-S","611","Max","Mustermann","611-2627-05a","student","2015-03-14","Hannover","m","NULL","2025-08-01","NULL","NULL"
+"611-9001-L","611","Anna","Lehrerin","","teacher","1980-03-12","","w","NULL","2015-08-01","LEH","NULL"</pre>
+  </section>
+
+  <section id="datenschutz" aria-labelledby="h-datenschutz">
+    <h2 id="h-datenschutz">Datenschutz</h2>
+    <p>sibank2educa arbeitet ausschließlich auf dem Rechner, auf dem es gestartet wird. Es baut keine Internetverbindung auf und überträgt keine Daten. Die erzeugten Dateien landen nur in dem Ordner, den Sie auswählen.</p>
+    <p>Diese Website lädt keine externen Schriften, Skripte oder Bilder und setzt keine Cookies.</p>
+    <div class="hinweis">
+      <p><strong>Echte Exportdateien gehören nicht ins Netz.</strong> Laden Sie Sibank-Exporte und erzeugte Importdateien nicht bei GitHub oder anderen Diensten hoch, auch nicht zum Melden eines Fehlers. Beschreiben Sie Probleme stattdessen mit erfundenen Beispieldaten.</p>
+    </div>
+  </section>
+
+  <section id="fragen" aria-labelledby="h-fragen">
+    <h2 id="h-fragen">Häufige Fragen</h2>
+    <details>
+      <summary>Windows zeigt beim Start eine Warnung. Ist das normal?</summary>
+      <div><p>Ja. Die EXE ist nicht kostenpflichtig signiert, deshalb meldet Windows SmartScreen beim ersten Start eine unbekannte App. Klicken Sie auf „Weitere Informationen“ und dann auf „Trotzdem ausführen“. Der vollständige Quellcode ist auf GitHub einsehbar.</p></div>
+    </details>
+    <details>
+      <summary>Muss Python installiert sein?</summary>
+      <div><p>Für die EXE nicht. Wer lieber das Python-Skript nutzt, braucht Python 3.8 oder neuer von python.org. Zusätzliche Pakete sind nicht nötig.</p></div>
+    </details>
+    <details>
+      <summary>Warum fehlen die Klassen 11 bis 13 in der Zieldatei?</summary>
+      <div><p>Das Häkchen „Oberstufe ausschließen“ ist beim Start gesetzt. Entfernen Sie es, werden alle Jahrgänge übernommen.</p></div>
+    </details>
+    <details>
+      <summary>Kann ich Schüler und Lehrer getrennt exportieren?</summary>
+      <div><p>Ja. Entfernen Sie das Häkchen „Schüler und Lehrer in einer Datei zusammenfügen“. Dann entstehen zwei Dateien mit SuS beziehungsweise LuL im Namen. Sie können auch nur eine der beiden Exportdateien laden.</p></div>
+    </details>
+    <details>
+      <summary>Wo speichert das Tool seine Einstellungen?</summary>
+      <div><p>In der Datei <code>.sibank2educa.json</code> in Ihrem Benutzerordner (<code>%USERPROFILE%</code>). Gespeichert werden nur Schulnummer, Zielordner, Kodierung und die Einstellung zum Geburtsort, keine Schülerdaten.</p></div>
+    </details>
+    <details>
+      <summary>Funktioniert es auch mit anderen Schulverwaltungsprogrammen?</summary>
+      <div><p>Nur wenn deren Export dieselben Spalten enthält wie die oben beschriebenen Sibank-Listen. Die Spaltennamen müssen passen, die Reihenfolge ist egal.</p></div>
+    </details>
+  </section>
+
+</main>
+
+<footer class="fuss">
+  <div class="wrap">
+    <p>sibank2educa ist freie Software unter der <a data-link="lizenz" href="https://github.com/">MIT-Lizenz</a>. <a data-link="repo" href="https://github.com/">Quellcode, Versionen und Fehlermeldungen auf GitHub</a>.</p>
+    <p>Dieses Projekt steht in keiner Verbindung zu den Herstellern von Sibank oder EDUCA. Die Nutzung erfolgt auf eigene Verantwortung. Prüfen Sie die erzeugten Dateien vor dem Import stichprobenartig.</p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  /* GitHub-Repository für die Links.
+     Leer lassen: Auf GitHub Pages (benutzername.github.io/sibank2educa) wird es automatisch erkannt.
+     Sonst eintragen, z. B. "benutzername/sibank2educa". */
+  var GITHUB_REPO = "";
+
+  var repo = GITHUB_REPO;
+  if (!repo && /\.github\.io$/.test(location.hostname)) {
+    var besitzer = location.hostname.split(".")[0];
+    var erster = location.pathname.split("/").filter(Boolean)[0];
+    repo = besitzer + "/" + (erster && !/\.html?$/.test(erster) ? erster : besitzer + ".github.io");
+  }
+  if (repo) {
+    var basis = "https://github.com/" + repo;
+    var ziele = {
+      repo: basis,
+      releases: basis + "/releases",
+      download: basis + "/releases/latest/download/sibank2educa.exe",
+      lizenz: basis + "/blob/main/LICENSE"
+    };
+    document.querySelectorAll("[data-link]").forEach(function (a) {
+      a.href = ziele[a.getAttribute("data-link")];
+    });
+  }
+
+  /* Zuordnungs-Demo */
+  var demo = document.getElementById("demo");
+  var erklaerung = document.getElementById("erklaerung");
+  var ausgaben = demo.querySelectorAll("[data-von]");
+
+  function verbundeneAusgaben(id) {
+    return Array.prototype.filter.call(ausgaben, function (el) {
+      return el.getAttribute("data-von").split(" ").indexOf(id) !== -1;
+    });
+  }
+
+  function aktivieren(el) {
+    demo.querySelectorAll(".an").forEach(function (x) { x.classList.remove("an"); });
+    el.classList.add("an");
+    var text = el.getAttribute("data-text");
+    var id = el.getAttribute("data-id");
+    if (id) {
+      var ziele = verbundeneAusgaben(id);
+      ziele.forEach(function (x) {
+        x.classList.add("an");
+        /* auch die übrigen Bestandteile desselben Zielfelds markieren */
+        x.getAttribute("data-von").split(" ").filter(Boolean).forEach(function (q) {
+          var quelle = demo.querySelector('[data-id="' + q + '"]');
+          if (quelle) quelle.classList.add("an");
+        });
+      });
+      if (!text && ziele[0]) text = ziele[0].getAttribute("data-text");
+    } else {
+      el.getAttribute("data-von").split(" ").filter(Boolean).forEach(function (q) {
+        var quelle = demo.querySelector('[data-id="' + q + '"]');
+        if (quelle) quelle.classList.add("an");
+      });
+    }
+    erklaerung.innerHTML = text || "";
+  }
+
+  demo.querySelectorAll(".zelle, .chip").forEach(function (el) {
+    el.addEventListener("mouseenter", function () { aktivieren(el); });
+    el.addEventListener("focus", function () { aktivieren(el); });
+    el.addEventListener("click", function () { aktivieren(el); });
+  });
+
+  aktivieren(demo.querySelector('[data-id="klasse"]'));
+})();
+</script>
+</body>
+</html>
