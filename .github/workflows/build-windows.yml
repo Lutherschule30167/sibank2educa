@@ -1,9 +1,11 @@
 name: Windows-EXE bauen
 
+# Läuft automatisch, sobald auf GitHub ein Release veröffentlicht wird,
+# und kann zusätzlich im Reiter "Actions" manuell gestartet werden.
 on:
-  push:
-    tags: ["v*"]        # z. B. git tag v1.0.0 && git push --tags
-  workflow_dispatch:     # manuell über den Reiter "Actions" startbar
+  release:
+    types: [published]
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -24,14 +26,14 @@ jobs:
       - name: EXE bauen
         run: pyinstaller --onefile --noconsole --name sibank2educa sibank2educa.py
 
-      - name: EXE als Build-Artefakt bereitstellen
+      - name: EXE als Download im Actions-Lauf bereitstellen
         uses: actions/upload-artifact@v4
         with:
           name: sibank2educa-windows
           path: dist/sibank2educa.exe
 
-      - name: EXE an Release anhängen
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v2
-        with:
-          files: dist/sibank2educa.exe
+      - name: EXE an das Release anhängen
+        if: github.event_name == 'release'
+        run: gh release upload "${{ github.event.release.tag_name }}" dist/sibank2educa.exe --clobber
+        env:
+          GH_TOKEN: ${{ github.token }}

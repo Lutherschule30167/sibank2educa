@@ -32,6 +32,52 @@ Voraussetzung ist Python 3.8 oder neuer von [python.org](https://www.python.org/
 python sibank2educa.py
 ```
 
+## Export aus Sibank vorbereiten
+
+Die beiden Exportdateien werden in Sibank über den **Listengenerator** erzeugt. Dafür muss einmalig je eine neue Liste für Schüler und für Lehrer angelegt werden. Die Felder müssen genau in der unten angegebenen Reihenfolge ausgewählt werden.
+
+Für alle Felder gelten auf dem Reiter **„Felder“** dieselben Einstellungen:
+
+| Einstellung | Wert |
+|---|---|
+| Breite | `0` |
+| Summe | nicht angehakt |
+| Ausrichtung | Links |
+| Vor / Nach | leer |
+| Spalte | fortlaufend (1, 2, 3, …) entsprechend der Reihenfolge unten |
+| Zeile | `1` |
+| Position | `1` |
+| Gleiche Felder einfügen | nicht angehakt |
+
+Die **Spalten-Überschriften** entsprechen jeweils dem Feldnamen, Ausrichtung Links.
+
+### Liste für den Schülerexport
+
+| Spalte | Feld / Überschrift |
+|---|---|
+| 1 | Identnummer |
+| 2 | offizieller Vorname |
+| 3 | Familienname |
+| 4 | Klasse |
+| 5 | Geburtsdatum |
+| 6 | Geburtsort |
+| 7 | Geschlecht |
+| 8 | Zugang |
+
+### Liste für den Lehrerexport
+
+| Spalte | Feld / Überschrift |
+|---|---|
+| 1 | LehrerID |
+| 2 | Vorname |
+| 3 | Name |
+| 4 | Geburtsdatum |
+| 5 | Geschlecht |
+| 6 | Zugangsdatum |
+| 7 | Kürzel |
+
+Die Listen werden anschließend als CSV-Datei exportiert. Groß- und Kleinschreibung der Überschriften spielt für sibank2educa keine Rolle.
+
 ## Bedienung
 
 1. **Sibank Schüler-Exportdatei** und/oder **Sibank Lehrer-Exportdatei** über „Öffnen …“ laden.
@@ -94,7 +140,7 @@ pip install pyinstaller
 pyinstaller --onefile --noconsole --name sibank2educa sibank2educa.py
 ```
 
-Die EXE liegt anschließend in `dist/`. Alternativ baut der GitHub-Workflow unter `.github/workflows/` die EXE automatisch, sobald ein Versions-Tag (z. B. `v1.0.0`) gepusht wird, und hängt sie an das Release an.
+Die EXE liegt anschließend in `dist/`. Alternativ baut der GitHub-Workflow unter `.github/workflows/` die EXE automatisch, sobald auf GitHub ein Release veröffentlicht wird, und hängt sie dort unter „Assets“ an.
 
 ## Hinweis
 
