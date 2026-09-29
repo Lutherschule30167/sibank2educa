@@ -1,0 +1,14 @@
+# Echte Schüler- und Lehrerdaten dürfen NIEMALS ins Repository!
+*.csv
+!beispiele/*.csv
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# PyInstaller
+build/
+dist/
+*.spec

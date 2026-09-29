@@ -1,0 +1,37 @@
+name: Windows-EXE bauen
+
+on:
+  push:
+    tags: ["v*"]        # z. B. git tag v1.0.0 && git push --tags
+  workflow_dispatch:     # manuell über den Reiter "Actions" startbar
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: PyInstaller installieren
+        run: pip install pyinstaller
+
+      - name: EXE bauen
+        run: pyinstaller --onefile --noconsole --name sibank2educa sibank2educa.py
+
+      - name: EXE als Build-Artefakt bereitstellen
+        uses: actions/upload-artifact@v4
+        with:
+          name: sibank2educa-windows
+          path: dist/sibank2educa.exe
+
+      - name: EXE an Release anhängen
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/sibank2educa.exe
