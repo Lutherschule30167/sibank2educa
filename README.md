@@ -4,6 +4,8 @@ Kleines Windows-Tool mit grafischer Oberfläche, das die CSV-Exporte aus **Siban
 
 Das Tool läuft vollständig lokal. Es werden keine Daten ins Internet übertragen.
 
+> **Status: Testphase.** sibank2educa ist ein privates Projekt, das den Umstieg auf ein neues Zeugnisprogramm erleichtern soll. Es ist nicht im Auftrag einer Schule oder Schulleitung entstanden. Bitte die erzeugten Dateien vor dem Import sorgfältig prüfen.
+
 ## Funktionen
 
 - Einlesen des Sibank-Schülerexports und/oder des Sibank-Lehrerexports
