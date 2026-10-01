@@ -25,7 +25,7 @@ from pathlib import Path
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 
-__version__ = "1.0.0"
+__version__ = "1.0.2"
 
 APP_TITEL = f"sibank2educa {__version__}  –  Sibank → EDUCA"
 CONFIG_DATEI = Path.home() / ".sibank2educa.json"

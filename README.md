@@ -144,6 +144,13 @@ pyinstaller --onefile --noconsole --name sibank2educa sibank2educa.py
 
 Die EXE liegt anschließend in `dist/`. Alternativ baut der GitHub-Workflow unter `.github/workflows/` die EXE automatisch, sobald auf GitHub ein Release veröffentlicht wird, und hängt sie dort unter „Assets“ an.
 
+### Neue Version veröffentlichen
+
+1. In `sibank2educa.py` die Versionsnummer `__version__` erhöhen und in `docs/index.html` die Angabe „Aktuelle Version“ anpassen.
+2. Auf GitHub ein Release mit dem passenden Tag anlegen, z. B. `v1.0.2` für `__version__ = "1.0.2"`.
+
+Der Workflow bricht ab, wenn Tag und `__version__` nicht übereinstimmen.
+
 ## Hinweis
 
 Dieses Projekt steht in keiner Verbindung zu den Herstellern von Sibank oder EDUCA und wird von ihnen weder unterstützt noch geprüft. Die Nutzung erfolgt auf eigene Verantwortung – bitte die erzeugten Dateien vor dem Import stichprobenartig prüfen.
