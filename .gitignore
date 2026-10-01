@@ -12,3 +12,6 @@ venv/
 build/
 dist/
 *.spec
+
+# Die EXE wird nur über GitHub-Releases verteilt
+*.exe
