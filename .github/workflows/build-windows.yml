@@ -20,6 +20,19 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Versionsnummer mit dem Release abgleichen
+        if: github.event_name == 'release'
+        shell: bash
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          tag="$TAG"
+          version=$(python -c "import ast; print(next(n.value.value for n in ast.parse(open('sibank2educa.py', encoding='utf-8').read()).body if isinstance(n, ast.Assign) and getattr(n.targets[0], 'id', '') == '__version__'))")
+          if [ "${tag#v}" != "$version" ]; then
+            echo "::error::Release-Tag $tag passt nicht zu __version__ = $version in sibank2educa.py"
+            exit 1
+          fi
+
       - name: PyInstaller installieren
         run: pip install pyinstaller
 
