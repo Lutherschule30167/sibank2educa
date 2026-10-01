@@ -146,7 +146,16 @@ Die EXE liegt anschließend in `dist/`. Alternativ baut der GitHub-Workflow unte
 
 ## Hinweis
 
-Dieses Projekt steht in keiner Verbindung zu den Herstellern von Sibank oder EDUCA. Alle genannten Produktnamen gehören ihren jeweiligen Inhabern. Die Nutzung erfolgt auf eigene Verantwortung – bitte die erzeugten Dateien vor dem Import stichprobenartig prüfen.
+Dieses Projekt steht in keiner Verbindung zu den Herstellern von Sibank oder EDUCA und wird von ihnen weder unterstützt noch geprüft. Die Nutzung erfolgt auf eigene Verantwortung – bitte die erzeugten Dateien vor dem Import stichprobenartig prüfen.
+
+### Marken
+
+Die Namen und Marken der genannten Programme gehören ihren jeweiligen Inhabern. Sie werden hier ausschließlich verwendet, um zu beschreiben, mit welchen Programmen sibank2educa zusammenarbeitet.
+
+| Programm | Rechteinhaber | Homepage |
+|---|---|---|
+| Sibank / SibankPLUS | Haneke Software, Siegburg | [haneke.de](https://haneke.de/) |
+| EDUCA (educa) | Digital Learning GmbH, Duderstadt | [digitallearning.gmbh](https://digitallearning.gmbh/) |
 
 ## Projektwebsite
 
