@@ -9,6 +9,10 @@ Läuft unter Windows, macOS und Linux. Benötigt nur die Python-Standardbiblioth
 Start:  python sibank2educa.py
 
 Erstellt mit Unterstützung von Claude (KI-Assistent von Anthropic).
+
+Marken: Sibank/SibankPLUS gehört Haneke Software (https://haneke.de/),
+EDUCA der Digital Learning GmbH (https://digitallearning.gmbh/). Dieses Projekt
+steht in keiner Verbindung zu den Herstellern.
 """
 
 import csv
